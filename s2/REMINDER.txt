@@ -1,0 +1,7 @@
+-- Liscensing --
+LIP (LOVE .Ini Parser) module
+LOVE itself
+
+-- Sounds --
+Dot remove: https://freesound.org/people/F.M.Audio/
+Paint: Roblox
