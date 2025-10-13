@@ -74,10 +74,11 @@ function scene.OnUpdate(dt)
 	Game.ElapsedTime = Game.ElapsedTime + dt
 
 	if bgCanvas:getWidth() ~= scrWidth or bgCanvas:getHeight() ~= scrHeight then
+		bgCanvas:release()
+		bgCanvas2:release()
 		bgCanvas = love.graphics.newCanvas()
+		bgCanvas2 = love.graphics.newCanvas()
 	end
-
-	bgImgData = love.image.newImageData(scrWidth, scrHeight)
 
 	PChanged = PChanged + dt
 
