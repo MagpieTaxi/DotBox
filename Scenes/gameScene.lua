@@ -20,23 +20,17 @@ local data = {
 
 local fadeShader = love.graphics.newShader(
 	[[
-    vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
-        vec4 px = Texel(tex, tc);
-        px.a *= 0.95;
-        return px;
-    }]]
+	vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
+		vec4 px = Texel(tex, tc);
+		px.a *= 0.95;
+		return px;
+	}]]
 )
-
-local coolFont;
-local dotBase;
-local lock;
 
 local bgCanvas = love.graphics.newCanvas();
 local bgCanvas2 = love.graphics.newCanvas();
 
 local gui = require("/Modules/gui")
-
-local lastMouse = {X = nil, Y = nil}
 
 -------------------------------------------
 
@@ -49,8 +43,8 @@ end
 function scene.Load()
 	scrWidth = love.graphics.getWidth()
 	scrHeight = love.graphics.getHeight()
-
-	coolFont = love.graphics.newFont("/Resources/ChicagoFLF.ttf", 12)
+	
+	Game.Audio.gui_select:setPitch(1)
 
 	if Game.ElapsedTime > 0 then goto continue end
 	for i = 1, Conf.dots.startingDots do
@@ -95,7 +89,6 @@ function scene.OnUpdate(dt)
 			v.vx = 0
 			v.vy = 0
 		end
-		local lastx, lasty = v.x, v.y
 
 		v.x = v.x + v.vx
 		v.y = v.y + v.vy
@@ -235,6 +228,7 @@ end
 
 function scene.OnDraw()
 	love.graphics.setColor(1,1,1,1)
+	if Conf.visual.velocityTrails == 0 then goto noTrails end
 	if Game.Paused == false or Game.Step == true then --render trails
 		love.graphics.setCanvas(bgCanvas2)
 		love.graphics.setShader(fadeShader)
@@ -245,6 +239,7 @@ function scene.OnDraw()
 	love.graphics.setCanvas()
 	love.graphics.draw(bgCanvas,0,0)
 	love.graphics.setShader()
+	::noTrails::
 
 	for i, v in ipairs(Game.Dots) do --renders the actual dots
 		if Conf.fun.coloringMode == 2 then
@@ -286,7 +281,7 @@ function scene.OnDraw()
 			)
 		end
 
-		if math.sqrt(v.vx^2 + v.vy^2) > 30 and (Game.Paused == false or Game.Step == true) then
+		if math.sqrt(v.vx^2 + v.vy^2) > 30 and (Game.Paused == false or Game.Step == true) and Conf.visual.velocityTrails == 1 then
 			love.graphics.setCanvas(bgCanvas) --put the trails in the canvas for next frame
 			love.graphics.setColor(v.c.R / 2, v.c.G / 2, v.c.B / 2, 1)
 			love.graphics.circle(
@@ -305,7 +300,7 @@ function scene.OnDraw()
 	love.graphics.setColor(1,1,1,2 - PChanged * 2)
 	love.graphics.printf(
 		text,
-		coolFont,
+		Game.Fonts.Bold,
 		5,
 		5,
 		100
@@ -313,8 +308,8 @@ function scene.OnDraw()
 	if dataVisible == true then --debug/data thingy
 		love.graphics.setColor(1,1,1,1)
 
-		local dotsLabel = love.graphics.newText(coolFont, "Dots: "..data.Dots)
-		local tempLabel = love.graphics.newText(coolFont, "Temperature: "..math.floor(data.Temperature * 100) / 100)
+		local dotsLabel = love.graphics.newText(Game.Fonts.Bold, "Dots: "..data.Dots)
+		local tempLabel = love.graphics.newText(Game.Fonts.Bold, "Temperature: "..math.floor(data.Temperature * 100) / 100)
 
 		love.graphics.draw(
 			dotsLabel,
@@ -332,7 +327,7 @@ function scene.OnDraw()
 		love.graphics.setColor(1,1,1, 5 - Game.ElapsedTime)
 		love.graphics.printf(
 			"Press ESC to return to the title",
-			coolFont,
+			Game.Fonts.Bold,
 			0,
 			5,
 			scrWidth,
@@ -354,7 +349,7 @@ function scene.OnKeypress(k)
 	elseif k == "right" and Game.Paused == true then
 		Game.Step = true
 	elseif k == "escape" then
-		Scenes:LoadScene("titleScene")
+		Scenes:LoadScene("titleScene2")
 	else
 		gui.OnKeyPress(k)
 	end

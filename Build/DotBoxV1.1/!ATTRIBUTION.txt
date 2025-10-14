@@ -1,0 +1,12 @@
+--## LOVE2D ##--
+LOVE2D -- https://love2d.org -- ZLIB
+
+--## MODULES ##--
+Inifile by Bart van Strien -- https://github.com/bartbes/inifile -- License: Simplified BSD
+
+--## SOUND EFFECTS ##--
+NOTE: Some sound effects may not be listed here. If your sound effect was used,
+please contact me at magpietaxi@gmail.com and i will add it to this list.
+
+Rhythmic Game Menu Ambience by PatrickLieberkind -- https://freesound.org/s/396024/ -- License: Attribution 4.0
+UI_Menu_Whosh by Valenspire -- https://freesound.org/s/699494/ -- License: Creative Commons 0

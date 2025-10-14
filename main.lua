@@ -6,10 +6,18 @@ Enum.LoveBindings = {
 	["MousePressed"] = 4,
 	["MouseReleased"] = 5,
 	["KeyPressed"] = 6,
-	["KeyReleased"] = 7
+	["KeyReleased"] = 7,
+	["MouseMoved"] = 8
 }
 
 Game = {}
+
+Task = {}
+local taskQueue = {}
+
+function Task.Delay(time, func)
+	table.insert(taskQueue, {Time = time, Func = func})
+end
 
 --# Load a bunch of files--------------------------------------
 
@@ -27,13 +35,21 @@ for i, v in pairs(love.filesystem.getDirectoryItems("Resources")) do
 	end
 end
 
+Game.Fonts = {
+	Bold = love.graphics.newFont("Resources/Recharge.ttf",16),
+	Regular = love.graphics.newFont("Resources/Chewy.ttf",16)
+}
+
 Game.Audio = {}
 
 assert(love.filesystem.getInfo("Resources/audio") ~= nil, "Audio folder does not exist.")
 for i, v in pairs(love.filesystem.getDirectoryItems("Resources/audio")) do
 	local filetype = string.match(v,"%.([^%s]*)")
 	local filename = v:match("^(.-)%.")
-	if filename == "music_intro" then goto continue end
+	if filename == "music_intro" or filename == "music_extra" then
+		Game.Audio[v:match("^(.-)%.")] = love.audio.newSource(love.filesystem.newFile("Resources/audio/"..v), "stream")
+		goto continue
+	end
 	if filetype == "mp3" or filetype == "ogg" then
 		Game.Audio[v:match("^(.-)%.")] = love.audio.newSource(love.filesystem.newFile("Resources/audio/"..v), "static")
 	end
@@ -73,9 +89,17 @@ coloringMode = 1
 infectionMode = 0
 mergeMode = 0
 
+[visual]
+velocityTrails = 1
+menuDetails = 1
+flashiness = 1
+
+[audio]
+masterVolume = 100
+
 [advanced]
 speedCap = 1
-	]])
+]])
 end
 
 --# Required modules-------------------------------------------
@@ -88,13 +112,14 @@ local ScenesManager = require("ScenesManager")
 
 --# Bind-To-Love system----------------------------------------
 local LoveBindings = {}
-LoveBindings[1] = {} --Load
+LoveBindings[1] = {} --Load --idk why this is even here. it literally cannot do anything
 LoveBindings[2] = {} --Update
 LoveBindings[3] = {} --Draw
 LoveBindings[4] = {} --MouseDown
 LoveBindings[5] = {} --MouseUp
 LoveBindings[6] = {} --KeyDown
 LoveBindings[7] = {} --KeyUp
+LoveBindings[8] = {} --MouseMoved
 
 function BindToLove(priority, lbType, func)
 	--[[ Binds a function to one of the default LOVE2D callbacks.
@@ -117,17 +142,29 @@ end
 --# Initialize ------------------------------------------------
 function love.load()
 	love.window.setMode(600, 400, {
-        resizable = true,
-        minwidth = 300,
-        minheight = 300,
-    })
-    love.window.setTitle("DotBox V1.0")
-    love.window.setIcon(love.image.newImageData("Resources/icon.png"))
+		resizable = true,
+		minwidth = 600,
+		minheight = 400,
+	})
+	love.window.setTitle("DotBox V1.0")
+	love.window.setIcon(love.image.newImageData("Resources/icon.png"))
+	love.audio.setVolume(Conf.audio.masterVolume / 100)
 	
 	RunLoveBindings(Enum.LoveBindings["Load"])
 end
 
 function love.update(dt)
+	if #taskQueue > 0 then
+		local taskRemove = {}
+		for i, v in pairs(taskQueue) do
+			v.Time = v.Time - dt
+			if v.Time <= 0 then
+				v.Func()
+				table.insert(taskRemove,i)
+			end
+		end
+		for i, v in pairs(taskRemove) do taskQueue[v] = nil end
+	end
 	RunLoveBindings(Enum.LoveBindings["Update"], dt)
 end
 
@@ -151,6 +188,10 @@ function love.mousereleased(...)
 	RunLoveBindings(Enum.LoveBindings["MouseReleased"],...)
 end
 
+function love.mousemoved(...)
+	RunLoveBindings(Enum.LoveBindings["MouseMoved"],...)
+end
+
 function love.quit()
 	Lip.save("config.ini",Conf)
 end
@@ -158,4 +199,4 @@ end
 -----------------------------------------------------------------------
 
 ScenesManager:Initialize()
-Scenes:LoadScene("titleScene")
+Scenes:LoadScene("introScene")

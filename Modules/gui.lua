@@ -164,8 +164,8 @@ function module.OnMouseRelease(x,y,mb)
 	if mb == 1 then mouse1Pressed = false elseif mb == 2 then mouse2Pressed = false end
 	if Game.Moving ~= nil and mb == 1 then
 		local moving = Game.Dots[Game.Moving]
-        moving.vx = (x - (lastMouse.X or x)) / 2
-        moving.vy = (y - (lastMouse.Y or y)) / 2
+		moving.vx = (x - (lastMouse.X or x)) / 1.5
+		moving.vy = (y - (lastMouse.Y or y)) / 1.5
 
 		if math.sqrt(moving.vx^2 + moving.vy^2) > 30 then
 			Game.Audio.whoosh:stop()
@@ -173,10 +173,10 @@ function module.OnMouseRelease(x,y,mb)
 			Game.Audio.whoosh:play()
 		end 
 
-        Game.Moving = nil
+		Game.Moving = nil
 
-        lastMouse = {X = nil, Y = nil}
-    end
+		lastMouse = {X = nil, Y = nil}
+	end
 	Game.Moving = nil
 end
 function module.OnKeyPress(k)
