@@ -190,7 +190,7 @@ local function RenderSettings()
 	if layer == 3 then
 		love.graphics.setFont(Game.Fonts.Bold)
 		love.graphics.printf(
-			"Type a number. Bounds: "..buttons[currentMenu][selectedIndex].Bounds[1]..", "..buttons[currentMenu][selectedIndex].Bounds[1],
+			"Type a number. Bounds: "..buttons[currentMenu][selectedIndex].Bounds[1]..", "..buttons[currentMenu][selectedIndex].Bounds[2],
 			0,
 			scrHeight / 2 + 55,
 			scrWidth,
@@ -396,6 +396,7 @@ function scene.OnDraw()
 	end
 end
 
+local capitalize = false
 function scene.OnKeypress(k)
 	if tsitSettings == true then return end
 	if layer == 3 then --keystroke capture
@@ -421,7 +422,13 @@ function scene.OnKeypress(k)
 			end
 		elseif k == "backspace" then
 			typingString = string.sub(typingString,1,-2)
+		elseif k == "lshift" or k == "rshift" then
+			capitalize = true
+		elseif k == "capslock" then
+			return
 		else
+			if capitalize == true then k = string.upper(k) end
+			if k == "space" then k = " " end
 			typingString = typingString..k
 		end
 	else --
@@ -435,6 +442,7 @@ function scene.OnKeypress(k)
 			elseif layer == 2 then
 				tsitSettings = true
 				Task.Delay(.5,function ()
+					selectedIndex = currentMenu
 					layer = layer - 1
 				end)
 			end
@@ -451,6 +459,7 @@ function scene.OnKeypress(k)
 				tsitSettings = true
 				Task.Delay(.5, function ()
 					currentMenu = selectedIndex
+					selectedIndex = 1
 					layer = 2
 				end)
 			else
@@ -464,6 +473,22 @@ function scene.OnKeypress(k)
 		elseif layer == 2 then
 			if selectedIndex > #buttons[currentMenu] then selectedIndex = 1 end
 			if selectedIndex < 1 then selectedIndex = #buttons[currentMenu] end
+		end
+	end
+end
+function scene.OnKeyrelease(k)
+	if k == "lshift" or k =="rshift" then
+		capitalize = false
+	end
+end
+function scene.OnMousepress(x,y,mb)
+	if mb == 1 then
+		if y > scrHeight / 2 + 50 then
+			scene.OnKeypress("down")
+		elseif y < scrHeight / 2 then
+			scene.OnKeypress("up")
+		else
+			scene.OnKeypress("return")
 		end
 	end
 end

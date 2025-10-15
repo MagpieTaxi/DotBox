@@ -14,6 +14,7 @@ Game.ElapsedTime = 0;
 local PChanged = math.huge;
 local dataVisible = false;
 local data = {
+	Mass = 0,
 	Temperature = 0,
 	Dots = 0,
 }
@@ -82,7 +83,10 @@ function scene.OnUpdate(dt)
 
 	data.Temperature = 0
 	data.Dots = #Game.Dots
-
+	data.Mass = 0
+	for _, dot in ipairs(Game.Dots) do
+		data.Mass = data.Mass + (dot.r*dot.r*math.pi)
+	end
 	for i, v in ipairs(Game.Dots) do
 		if i == Game.Moving then goto continue end
 		if v.frozen == true then
@@ -219,7 +223,10 @@ function scene.OnUpdate(dt)
 			v.vx = unit[1] * maxSpeed
 			v.vy = unit[2] * maxSpeed
 		end
-		data.Temperature = data.Temperature + math.sqrt(v.vx^2 + v.vy^2)
+
+		local mass = math.pi * v.r * v.r
+		local temp = (0.5 * mass * (v.vx^2 + v.vy^2)) / data.Mass
+		data.Temperature = data.Temperature + temp
 
 		::continue::
 	end
@@ -310,17 +317,12 @@ function scene.OnDraw()
 
 		local dotsLabel = love.graphics.newText(Game.Fonts.Bold, "Dots: "..data.Dots)
 		local tempLabel = love.graphics.newText(Game.Fonts.Bold, "Temperature: "..math.floor(data.Temperature * 100) / 100)
+		local tempLabel = love.graphics.newText(Game.Fonts.Bold, "Temperature: "..math.floor(data.Temperature * 100) / 100)
 
-		love.graphics.draw(
-			dotsLabel,
-			scrWidth - dotsLabel:getWidth() - 5,
-			5
-		)
-		love.graphics.draw(
-			tempLabel,
-			scrWidth - tempLabel:getWidth() - 5,
-			10 + dotsLabel:getHeight()
-		)
+		love.graphics.setFont(Game.Fonts.Bold)
+		love.graphics.printf("Dots: "..data.Dots,0,0,scrWidth,"right")
+		love.graphics.printf("Temperature: "..(math.floor(data.Temperature * 100) / 100),0,24,scrWidth,"right")
+		love.graphics.printf("Mass: "..(math.floor(data.Mass) / 100),0,48,scrWidth,"right")
 	end
 
 	if Game.ElapsedTime < 10 then --title hint

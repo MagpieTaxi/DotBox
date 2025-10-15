@@ -42,10 +42,11 @@ local buttons = {
 			end
 		},
 		[3] = {
-			Text = love.graphics.newText(Game.Fonts.Regular, "Extras"),
+			Text = love.graphics.newText(Game.Fonts.Regular, "? ? ?"),
 			OnInteract = function ()
-				Game.Audio.dot_spawn:stop()
-				Game.Audio.dot_spawn:play()
+				Game.Audio.paint_splat:stop()
+				Game.Audio.paint_splat:setPitch(math.random(10,120) / 100)
+				Game.Audio.paint_splat:play()
 			end
 		},
 		[4] = {
@@ -115,9 +116,13 @@ end
 function scene.OnUpdate(dt)
 	scrWidth, scrHeight = love.graphics.getWidth(), love.graphics.getHeight()
 	sceneTime = sceneTime + dt
+	Game.Audio.music_intro:setVolume(1 - transitionTime * 3)
 	if transitioning == true then
 		transitionTime = transitionTime + dt
-		Game.Audio.music_intro:setVolume(1 - transitionTime * 3)
+		if transitionTime > 2 then
+			transitionTime = 0
+			transitioning = false
+		end
 	end
 end
 
@@ -182,8 +187,14 @@ function scene.OnKeypress(k)
 	end
 end
 
-function scene.OnMousepress()
-	buttons[currentMenu][selectedIndex].OnInteract()
+function scene.OnMousepress(x, y)
+	for i, v in pairs(buttons[currentMenu]) do
+		local p = #buttons[currentMenu] - i - 1
+		local yPos = scrHeight - ((#buttons[currentMenu] + p) * 40) + 5
+		if y > yPos and y < yPos + 30 then
+			buttons[currentMenu][selectedIndex].OnInteract()
+		end
+	end
 end
 
 function scene.OnMousemoved(x, y)
